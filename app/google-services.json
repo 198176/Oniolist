@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "468874513184",
+    "firebase_url": "https://oniolist.firebaseio.com",
+    "project_id": "oniolist",
+    "storage_bucket": "oniolist.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468874513184:android:057b5ef2c94a3572",
+        "android_client_info": {
+          "package_name": "com.example.user.oniolist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "468874513184-6vjhalh0seotbo2f5copchtv35kph2gh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.user.oniolist",
+            "certificate_hash": "6995fb3eefd930b18943cd673c89782ca989fa15"
+          }
+        },
+        {
+          "client_id": "468874513184-g8vm79qvc8d7kju3k99htsegkr721a4d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_Sn8FNCl3KfWrHw-zoDh9SZ2HbfEYYro"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "468874513184-g8vm79qvc8d7kju3k99htsegkr721a4d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

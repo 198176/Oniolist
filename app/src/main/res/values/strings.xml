@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Oniolist</string>
+    <string name="sign_in">Logowanie</string>
 </resources>

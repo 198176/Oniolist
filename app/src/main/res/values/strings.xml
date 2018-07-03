@@ -5,4 +5,12 @@
     <string name="list_name">Nazwa listy</string>
     <string name="product_name">Nazwa produktu</string>
     <string name="new_product">Nowy produkt</string>
+    <string name="remove_products_bought">Usuń kupione produkty</string>
+    <string name="remove_this_list">Usuń tą listę</string>
+    <string name="confirmation">Potwierdzenie</string>
+    <string name="ask_remove_list">Czy na pewno chcesz usunąć listę?</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Anuluj</string>
+    <string name="list_must_have_name">Lista musi posiadać nazwę!</string>
+    <string name="product_must_have_name">Produkt musi posiadać nazwę!</string>
 </resources>

@@ -2,6 +2,10 @@ package com.example.user.oniolist;
 
 public class ShoppingList {
 
+    static final String LISTS = "lists";
+    static final String PRODUCTS = "products";
+    static final String BOUGHT = "bought";
+    static final String LISTOWNER = "listOwner";
     private String id;
     private String listName;
     private String listOwner;

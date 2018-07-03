@@ -28,6 +28,8 @@ import com.google.firebase.database.Query;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String IDLIST = "idList";
+    public static final String TITLE = "title";
     static SnapshotParser<ShoppingList> parser = new SnapshotParser<ShoppingList>() {
         @Override
         public ShoppingList parseSnapshot(DataSnapshot dataSnapshot) {
@@ -38,13 +40,8 @@ public class MainActivity extends AppCompatActivity {
             return shoppingList;
         }
     };
-
     private DatabaseReference databaseReference;
-    private RecyclerView listRecyclerView;
-    private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter firebaseAdapter;
-    private FirebaseAuth firebaseAuth;
-    private FirebaseUser firebaseUser;
     private String emailUser;
 
     @Override
@@ -52,11 +49,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        listRecyclerView = (RecyclerView) findViewById(R.id.listRecyclerView);
-        linearLayoutManager = new LinearLayoutManager(this);
+        RecyclerView listRecyclerView = findViewById(R.id.listRecyclerView);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         listRecyclerView.setLayoutManager(linearLayoutManager);
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseUser = firebaseAuth.getCurrentUser();
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser == null) {
             startActivity(new Intent(this, SignInActivity.class));
             finish();
@@ -65,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        Query query = databaseReference.child("lists").orderByChild("listOwner").equalTo(emailUser);
+        Query query = databaseReference.child(ShoppingList.LISTS).orderByChild(ShoppingList.LISTOWNER).equalTo(emailUser);
         FirebaseRecyclerOptions<ShoppingList> options = new FirebaseRecyclerOptions
                 .Builder<ShoppingList>().setQuery(query, parser).build();
         firebaseAdapter = new FirebaseRecyclerAdapter<ShoppingList, ListViewHolder>(options) {
@@ -84,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(MainActivity.this, ProductActivity.class);
-                        intent.putExtra("idList", model.getId());
-                        intent.putExtra("title", model.getListName());
+                        intent.putExtra(IDLIST, model.getId());
+                        intent.putExtra(TITLE, model.getListName());
                         startActivity(intent);
                     }
                 });
@@ -93,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         listRecyclerView.setAdapter(firebaseAdapter);
-        FloatingActionButton floatingButton = (FloatingActionButton) findViewById(R.id.listFloatingButton);
+        FloatingActionButton floatingButton = findViewById(R.id.listFloatingButton);
         floatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,21 +98,21 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
                 alertDialog.setView(mView);
 
-                final EditText textDialog = (EditText) mView.findViewById(R.id.nameListDialog);
+                final EditText textDialog = mView.findViewById(R.id.nameListDialog);
                 alertDialog.setCancelable(false)
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialogBox, int id) {
                                 String nameList = textDialog.getText().toString().trim();
                                 if (nameList.length() > 0) {
                                     ShoppingList shoppingList = new ShoppingList(nameList, emailUser);
-                                    databaseReference.child("lists").push().setValue(shoppingList);
+                                    databaseReference.child(ShoppingList.LISTS).push().setValue(shoppingList);
                                 } else {
-                                    Toast.makeText(MainActivity.this, "Lista musi posiadać nazwę!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainActivity.this, R.string.list_must_have_name, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         })
 
-                        .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialogBox, int id) {
                                 dialogBox.cancel();
                             }
@@ -141,9 +138,9 @@ public class MainActivity extends AppCompatActivity {
     public static class ListViewHolder extends RecyclerView.ViewHolder {
         TextView listTextView;
 
-        public ListViewHolder(View v) {
+        ListViewHolder(View v) {
             super(v);
-            listTextView = (TextView) itemView.findViewById(R.id.listTextView);
+            listTextView = itemView.findViewById(R.id.listTextView);
         }
     }
 }

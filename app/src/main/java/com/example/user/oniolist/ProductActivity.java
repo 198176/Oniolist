@@ -10,6 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -20,17 +23,18 @@ import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import static com.example.user.oniolist.MainActivity.parser;
 
 public class ProductActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
-    private RecyclerView listRecyclerView;
-    private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter firebaseAdapter;
     private String idList;
 
@@ -39,14 +43,14 @@ public class ProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Intent intent = getIntent();
-        idList = intent.getStringExtra("idList");
-        setTitle(intent.getStringExtra("title"));
+        idList = intent.getStringExtra(MainActivity.IDLIST);
+        setTitle(intent.getStringExtra(MainActivity.TITLE));
 
-        listRecyclerView = (RecyclerView) findViewById(R.id.listRecyclerView);
-        linearLayoutManager = new LinearLayoutManager(this);
+        RecyclerView listRecyclerView = findViewById(R.id.listRecyclerView);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         listRecyclerView.setLayoutManager(linearLayoutManager);
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        Query query = databaseReference.child("lists").child(idList).child("products");
+        Query query = databaseReference.child(ShoppingList.LISTS).child(idList).child(ShoppingList.PRODUCTS);
         FirebaseRecyclerOptions<ShoppingList> options = new FirebaseRecyclerOptions
                 .Builder<ShoppingList>().setQuery(query, parser).build();
         firebaseAdapter = new FirebaseRecyclerAdapter<ShoppingList, ProductActivity.ListViewHolder>(options) {
@@ -67,7 +71,7 @@ public class ProductActivity extends AppCompatActivity {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         model.setBought(isChecked);
-                        databaseReference.child("lists").child(idList).child("products")
+                        databaseReference.child(ShoppingList.LISTS).child(idList).child(ShoppingList.PRODUCTS)
                                 .child(model.getId()).setValue(model);
                     }
                 });
@@ -75,7 +79,7 @@ public class ProductActivity extends AppCompatActivity {
         };
 
         listRecyclerView.setAdapter(firebaseAdapter);
-        FloatingActionButton floatingButton = (FloatingActionButton) findViewById(R.id.listFloatingButton);
+        FloatingActionButton floatingButton = findViewById(R.id.listFloatingButton);
         floatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,24 +87,24 @@ public class ProductActivity extends AppCompatActivity {
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(ProductActivity.this);
                 alertDialog.setView(mView);
 
-                final EditText textDialog = (EditText) mView.findViewById(R.id.nameListDialog);
-                TextView textView = (TextView) mView.findViewById(R.id.dialogTitle);
+                final EditText textDialog = mView.findViewById(R.id.nameListDialog);
+                TextView textView = mView.findViewById(R.id.dialogTitle);
                 textView.setText(R.string.new_product);
                 textDialog.setHint(R.string.product_name);
                 alertDialog.setCancelable(false)
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialogBox, int id) {
                                 String nameList = textDialog.getText().toString().trim();
                                 if (nameList.length() > 0) {
                                     ShoppingList shoppingList = new ShoppingList(nameList, false);
-                                    databaseReference.child("lists").child(idList).child("products").push().setValue(shoppingList);
+                                    databaseReference.child(ShoppingList.LISTS).child(idList).child(ShoppingList.PRODUCTS).push().setValue(shoppingList);
                                 } else {
-                                    Toast.makeText(ProductActivity.this, "Produkt musi posiadać nazwę!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ProductActivity.this, R.string.product_must_have_name, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         })
 
-                        .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialogBox, int id) {
                                 dialogBox.cancel();
                             }
@@ -123,12 +127,59 @@ public class ProductActivity extends AppCompatActivity {
         firebaseAdapter.startListening();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.remove_products:
+                databaseReference.child(ShoppingList.LISTS).child(idList).child(ShoppingList.PRODUCTS).orderByChild(ShoppingList.BOUGHT)
+                        .equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot postsnapshot : dataSnapshot.getChildren()) {
+                            postsnapshot.getRef().removeValue();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+                return true;
+            case R.id.remove_list:
+                AlertDialog.Builder builder = new AlertDialog.Builder(ProductActivity.this);
+                builder.setTitle(R.string.confirmation)
+                        .setMessage(R.string.ask_remove_list)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                                databaseReference.child(ShoppingList.LISTS).child(idList).removeValue();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        }).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     public static class ListViewHolder extends RecyclerView.ViewHolder {
         CheckBox listCheckBox;
 
-        public ListViewHolder(View v) {
+        ListViewHolder(View v) {
             super(v);
-            listCheckBox = (CheckBox) itemView.findViewById(R.id.checkProduct);
+            listCheckBox = itemView.findViewById(R.id.checkProduct);
         }
     }
 }

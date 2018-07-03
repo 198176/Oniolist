@@ -1,16 +1,20 @@
 package com.example.user.oniolist;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -78,31 +82,36 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                int friendlyMessageCount = firebaseAdapter.getItemCount();
-                int lastVisiblePosition =
-                        linearLayoutManager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded or the
-                // user is at the bottom of the list, scroll to the bottom
-                // of the list to show the newly added message.
-                if (lastVisiblePosition == -1 ||
-                        (positionStart >= (friendlyMessageCount - 1) &&
-                                lastVisiblePosition == (positionStart - 1))) {
-                    listRecyclerView.scrollToPosition(positionStart);
-                }
-            }
-        });
-
         listRecyclerView.setAdapter(firebaseAdapter);
         FloatingActionButton floatingButton = (FloatingActionButton) findViewById(R.id.listFloatingButton);
         floatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ShoppingList shoppingList = new ShoppingList("test", emailUser);
-                databaseReference.child("lists").push().setValue(shoppingList);
+                View mView = LayoutInflater.from(MainActivity.this).inflate(R.layout.new_list_dialog, null);
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+                alertDialog.setView(mView);
+
+                final EditText textDialog = (EditText) mView.findViewById(R.id.nameListDialog);
+                alertDialog.setCancelable(false)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialogBox, int id) {
+                                String nameList = textDialog.getText().toString().trim();
+                                if (nameList.length() > 0) {
+                                    ShoppingList shoppingList = new ShoppingList(nameList, emailUser);
+                                    databaseReference.child("lists").push().setValue(shoppingList);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Lista musi posiadać nazwę!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+
+                        .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialogBox, int id) {
+                                dialogBox.cancel();
+                            }
+                        });
+
+                alertDialog.create().show();
             }
         });
     }

@@ -5,12 +5,18 @@ public class ShoppingList {
     private String id;
     private String listName;
     private String listOwner;
+    private boolean isBought;
 
     public ShoppingList() {}
 
     public ShoppingList(String listName, String listOwner) {
         this.listName = listName;
         this.listOwner = listOwner;
+    }
+
+    public ShoppingList(String listName, boolean isBought) {
+        this.listName = listName;
+        this.isBought = isBought;
     }
 
     public String getId() {
@@ -35,5 +41,13 @@ public class ShoppingList {
 
     public void setListOwner(String listOwner) {
         this.listOwner = listOwner;
+    }
+
+    public boolean isBought() {
+        return isBought;
+    }
+
+    public void setBought(boolean bought) {
+        isBought = bought;
     }
 }

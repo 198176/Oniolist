@@ -3,4 +3,6 @@
     <string name="sign_in">Logowanie</string>
     <string name="new_list">Nowa lista</string>
     <string name="list_name">Nazwa listy</string>
+    <string name="product_name">Nazwa produktu</string>
+    <string name="new_product">Nowy produkt</string>
 </resources>
